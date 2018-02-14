@@ -153,14 +153,12 @@ void test_expand(int npts) {
 void test_pvfmm(int npts) {
     MPI_Init(nullptr,nullptr);
     double *cPtr = new double[3 * npts]; // coordinate
-    double *tPtr = new double[3 * npts]; // coordinate
     double *fPtr = new double[3 * npts]; // force
     double *vPtr = new double[3 * npts]; // velocity
     for (int i = 0; i < 3 * npts; i++) {
         fPtr[i] = 1;
         vPtr[i] = 0;
         cPtr[i] = i;
-        tPtr[i] = i;
     }
 
     const pvfmm::Kernel<double> &kernel = pvfmm::StokesKernel<double>::velocity();
@@ -172,13 +170,12 @@ void test_pvfmm(int npts) {
     Timer timer;
     timer.start();
 
-    kernel.k_s2t->ker_poten(cPtr, npts, fPtr, 1, tPtr, npts, vPtr, NULL);
+    kernel.k_s2t->ker_poten(cPtr, npts, fPtr, 1, cPtr, npts, vPtr, NULL);
 
     timer.stop("pvfmm sum complete, ");
     timer.dump();
     printf("result0: %lf; Speed: %lf M interactions/s\n", vPtr[0], (npts * npts) * (1e-6) / timer.getTime());
     delete[] cPtr;
-    delete[] tPtr;
     delete[] fPtr;
     delete[] vPtr;
     MPI_Finalize();
