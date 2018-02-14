@@ -29,6 +29,7 @@ TARGET_BIN = \
        $(BINDIR)/memcpy \
        $(BINDIR)/arrayscan \
        $(BINDIR)/gemm \
+       $(BINDIR)/rsqrt
 
 all : $(TARGET_BIN)
 
