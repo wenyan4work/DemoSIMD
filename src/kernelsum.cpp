@@ -128,7 +128,7 @@ void test_expand(int npts) {
             const double ry = (ty - ly);
             const double rz = (tz - lz);
             const double rnorm2 = rx * rx + ry * ry + rz * rz;
-            if (rnorm2 > 1e-9) {
+            if (rnorm2 != 0) {
                 const double rinv = 1 / sqrt(rnorm2);
                 const double rinv3 = rinv * rinv * rinv;
                 const double commonFac = (rx * fx + ry * fy + rz * fz);
