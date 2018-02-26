@@ -78,22 +78,30 @@ void test_avxf(int size) {
     timer.start();
 
     const __m256 d = _mm256_load_ps(data);
-    for (unsigned int j = 0; j < size; j++) {
-        __m256 r = _mm256_load_ps(result);
-        __m256 rsqrt = _mm256_rsqrt_ps(_mm256_add_ps(r, d)); // fast inv sqrt
-        r = _mm256_add_ps(r, rsqrt);
-        _mm256_store_ps(result, r);
-    }
+    const __m256 half = _mm256_set1_ps(0.5f);
+    const __m256 three = _mm256_set1_ps(3.0f);
 
-    timer.stop("simple rsqrt complete, ");
+    __m256 r = _mm256_load_ps(result);
+
+    for (unsigned int j = 0; j < size; j++) {
+        __m256 x = _mm256_add_ps(r, d);
+        __m256 nr = _mm256_rsqrt_ps(x); // inverse sqrt approximate
+        __m256 muls = _mm256_mul_ps(_mm256_mul_ps(x, nr), nr);
+        __m256 result = _mm256_mul_ps(_mm256_mul_ps(half, nr), _mm256_sub_ps(three, muls)); // newton iteration
+
+        r = _mm256_add_ps(r, result);
+    }
+    _mm256_store_ps(result, r);
+
+    timer.stop("avx rsqrtf complete, ");
     timer.dump();
     printf("result0: %lf; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_magicf(int size) {
 
-    double data[8] = {1, 2, 3, 4, 5, 6, 7, 8};
-    double result[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+    float data[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+    float result[8] = {0, 0, 0, 0, 0, 0, 0, 0};
 
     Timer timer;
     timer.start();
@@ -102,7 +110,7 @@ void test_magicf(int size) {
             result[i] += frsqrtf(data[i] + result[i]);
         }
     }
-    timer.stop("FLOAT rsqrt complete, ");
+    timer.stop("FLOAT magic rsqrt complete, ");
     timer.dump();
     printf("result0: %lf; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
 }
@@ -119,7 +127,7 @@ void test_magicd(int size) {
             result[i] += frsqrtd(data[i] + result[i]);
         }
     }
-    timer.stop("DOUBLE rsqrt complete, ");
+    timer.stop("DOUBLE magic rsqrt complete, ");
     timer.dump();
     printf("result0: %lf; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
 }
@@ -127,9 +135,15 @@ void test_magicd(int size) {
 void test_ompsimd(int size) {}
 
 int main() {
-    test_simple(1000000);
-    test_magicf(1000000);
-    test_magicd(1000000);
-    test_avxf(1000000);
+    constexpr int size = 1000000;
+    printf("double precision results\n");
+    test_simple(size);
+    test_magicd(size);
+    printf("------------------------\n");
+
+    printf("single precision results\n");
+    test_magicf(size);
+    test_avxf(size);
+    printf("------------------------\n");
     return 0;
 }
