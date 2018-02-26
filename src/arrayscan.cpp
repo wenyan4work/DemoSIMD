@@ -16,6 +16,7 @@ void test_simple(int size) {
     double *__restrict__ toPtr = new double[size];
     for (int i = 0; i < size; i++) {
         fromPtr[i] = i;
+        toPtr[i] = 0;
     }
 
     Timer timer;
@@ -40,6 +41,7 @@ void test_ompsimd(int size) {
 
     for (int i = 0; i < size; i++) {
         fromPtr[i] = i;
+        toPtr[i] = 0;
     }
 
     Timer timer;
@@ -65,6 +67,7 @@ void test_manual(int size) {
 
     for (int i = 0; i < size; i++) {
         fromPtr[i] = i;
+        toPtr[i] = 0;
     }
     const __m256d five = _mm256_set1_pd(5.0);
     const __m256d ten = _mm256_set1_pd(10.0);
