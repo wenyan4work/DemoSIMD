@@ -3,11 +3,7 @@
 To demo simd tricks, cache blocking tricks, and more to be added.
 
 ## To compile:
-### Case 1: Compile with Eigen and pvfmm
-Just modify the paths in the Makefile, and type 'make'. CXXFLAGS and LDFLAGS are set to use PVFMM values.
-
-### Case 2: Compile without Eigen and pvfmm
-Comment out eigen and pvfmm dependences in gemm.cpp and kernelsum.cpp, manually add CXXFLAGS and LDFLAGS.
+Set the three switches to 'yes' or 'no' at the beginning of Makefile. 'VECREPORT' works only with intel compilers 
 
 ## memcpy.cpp:
 Demonstrates memcpy() vs simple loop. Compiler is smart enough to recognize the simple loop pattern and auto optimize the loop

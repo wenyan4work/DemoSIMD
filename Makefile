@@ -1,26 +1,28 @@
-# switches, yes or no
+## switches, yes or no
 HAVEPVFMM = yes
 HAVEEIGEN = yes
 VECREPORT = yes
 
-# change this if you need eigen. no action needed if not using eigen
+## change this if you need eigen. no action needed if not using eigen
 EIGEN = /mnt/home/wyan/local/include/eigen3
 
 
-# Possible choices of compilers and flags if not using PVFMM
-# Will be replaced if pvfmm is used
+## Possible choices of compilers and flags if not using PVFMM
+## Will be replaced if pvfmm is used
 
-# linux intel
+## linux intel
 CXX=icpc
 CXXFLAGS= -std=c++11 -qopenmp -O3 -DNDEBUG -xcore-avx2
 
-# linux gcc
+## linux gcc
 # CXX= g++
 # CXXFLAGS= -std=c++11 -fopenmp -O3 -DNDEBUG -march=core-avx2 
 
-# mac. DO NOT use mac default gcc/clang. Use gcc from macports or homebrew
-#CXX= g++-mp-7
-#CXXFLAGS=  -std=c++11 -fopenmp -O3 -DNDEBUG -march=core-avx2 -Wa,-q -I/Users/wyan/local/include/eigen3
+## mac. DO NOT use mac default gcc/clang. Use gcc from macports or homebrew
+## You need special settings to activate avx:
+## Install a new clang, use -Wa,-q to use the clang as the assembler
+# CXX= g++-mp-7
+# CXXFLAGS=  -std=c++11 -fopenmp -O3 -DNDEBUG -march=core-avx2 -Wa,-q
 
 ###############################################
 #   No modifications needed below this line   #
