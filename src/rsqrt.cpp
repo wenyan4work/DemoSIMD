@@ -20,7 +20,6 @@ inline double frsqrtd(double number) {
     conv.i = 0x5FE6EB50C7B537A9 - (conv.i >> 1); // magic number for float
     conv.d = conv.d * (threehalfs - (x2 * conv.d * conv.d));
     conv.d = conv.d * (threehalfs - (x2 * conv.d * conv.d));
-    conv.d = conv.d * (threehalfs - (x2 * conv.d * conv.d));
     // Newton iteration: rinv = 0.5 rinv_approx ( 3 - r2 rinv_approx^2 )
 
     return conv.d;
@@ -57,7 +56,12 @@ void test_simple(int size) {
     }
     timer.stop("simple rsqrt complete, ");
     timer.dump();
-    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
+
+    double sum = 0;
+    for (int i = 0; i < 8; i++) {
+        sum += result[i];
+    }
+    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", sum, (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_simplef(int size) {
@@ -74,7 +78,11 @@ void test_simplef(int size) {
     }
     timer.stop("simple rsqrt complete, ");
     timer.dump();
-    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
+    double sum = 0;
+    for (int i = 0; i < 8; i++) {
+        sum += result[i];
+    }
+    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", sum, (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_avxf0(int size) {
@@ -112,7 +120,11 @@ void test_avxf0(int size) {
 
     timer.stop("avx rsqrtf NWTN 0 complete, ");
     timer.dump();
-    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
+    double sum = 0;
+    for (int i = 0; i < 8; i++) {
+        sum += result[i];
+    }
+    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", sum, (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_avxf1(int size) {
@@ -150,7 +162,11 @@ void test_avxf1(int size) {
 
     timer.stop("avx rsqrtf NWTN 1 complete, ");
     timer.dump();
-    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
+    double sum = 0;
+    for (int i = 0; i < 8; i++) {
+        sum += result[i];
+    }
+    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", sum, (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_avxd2(int size) {
@@ -183,7 +199,7 @@ void test_avxd2(int size) {
         __m256d x = _mm256_add_pd(r0, d0);
         __m256d nr = _mm256_cvtps_pd(_mm_rsqrt_ps(_mm256_cvtpd_ps(x))); // inverse sqrt approximate
         __m256d muls = _mm256_mul_pd(_mm256_mul_pd(x, nr), nr);
-        __m256 result = _mm256_mul_pd(_mm256_mul_pd(half, nr), _mm256_sub_pd(three, muls)); // newton iteration
+        __m256d result = _mm256_mul_pd(_mm256_mul_pd(half, nr), _mm256_sub_pd(three, muls)); // newton iteration
         muls = _mm256_mul_pd(_mm256_mul_pd(x, nr), nr);
         result = _mm256_mul_pd(_mm256_mul_pd(half, nr), _mm256_sub_pd(three, muls)); // newton iteration
         r0 = _mm256_add_pd(r0, result);
@@ -201,7 +217,11 @@ void test_avxd2(int size) {
 
     timer.stop("avx rsqrt double NWTN 2 complete, ");
     timer.dump();
-    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
+    double sum = 0;
+    for (int i = 0; i < 8; i++) {
+        sum += result[i];
+    }
+    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", sum, (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_magicf(int size) {
@@ -218,7 +238,11 @@ void test_magicf(int size) {
     }
     timer.stop("FLOAT magic rsqrt complete, ");
     timer.dump();
-    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
+    double sum = 0;
+    for (int i = 0; i < 8; i++) {
+        sum += result[i];
+    }
+    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", sum, (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_magicd(int size) {
@@ -235,7 +259,11 @@ void test_magicd(int size) {
     }
     timer.stop("DOUBLE magic rsqrt complete, ");
     timer.dump();
-    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
+    double sum = 0;
+    for (int i = 0; i < 8; i++) {
+        sum += result[i];
+    }
+    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", sum, (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_ompsimd(int size) {}
