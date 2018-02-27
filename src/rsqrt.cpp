@@ -23,6 +23,7 @@ inline double frsqrtd(double number) {
     conv.i = 0x5FE6EB50C7B537A9 - (conv.i >> 1); // magic number for float
     conv.d = conv.d * (threehalfs - (x2 * conv.d * conv.d));
     conv.d = conv.d * (threehalfs - (x2 * conv.d * conv.d));
+    conv.d = conv.d * (threehalfs - (x2 * conv.d * conv.d));
     return conv.d;
 }
 
@@ -57,7 +58,7 @@ void test_simple(int size) {
     }
     timer.stop("simple rsqrt complete, ");
     timer.dump();
-    printf("result0: %lf; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
+    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_avxf(int size) {
@@ -95,7 +96,7 @@ void test_avxf(int size) {
 
     timer.stop("avx rsqrtf complete, ");
     timer.dump();
-    printf("result0: %lf; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
+    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_magicf(int size) {
@@ -112,7 +113,7 @@ void test_magicf(int size) {
     }
     timer.stop("FLOAT magic rsqrt complete, ");
     timer.dump();
-    printf("result0: %lf; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
+    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_magicd(int size) {
@@ -129,13 +130,18 @@ void test_magicd(int size) {
     }
     timer.stop("DOUBLE magic rsqrt complete, ");
     timer.dump();
-    printf("result0: %lf; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
+    printf("result0: %.17g; Speed: %lf MRSQRT/s\n", result[0], (size * 8) * (1e-6) / timer.getTime());
 }
 
 void test_ompsimd(int size) {}
 
 int main() {
     constexpr int size = 1000000;
+    printf("single precision results\n");
+    test_magicf(size);
+    test_avxf(size);
+    printf("------------------------\n");
+
     printf("double precision results\n");
     test_simple(size);
     test_magicd(size);

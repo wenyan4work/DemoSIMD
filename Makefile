@@ -28,6 +28,8 @@ CXXFLAGS= -std=c++11 -qopenmp -O3 -DNDEBUG -xcore-avx2
 #   No modifications needed below this line   #
 ############################################### 
 
+CXXFLAGS += -DNDEBUG
+
 LD= $(CXX) 
 LINKFLAGS= $(CXXFLAGS)
 
@@ -54,7 +56,6 @@ endif
 RM = rm -f
 MKDIRS = mkdir -p
 
-# TODO: generate obj and bin folder for each compiler flag combination
 BINDIR = ./bin
 SRCDIR = ./src
 OBJDIR = ./obj

@@ -49,7 +49,7 @@ void test_eigen(int size) {
 
     Timer timer;
     timer.start();
-    C = A * B;
+    C = (A * B).eval();
     timer.stop("eigen gemm complete, ");
     timer.dump();
     printf("C[0,0]: %lf\n", C(0, 0));
@@ -93,7 +93,7 @@ void test_align32blocking(int size) {
 }
 
 int main() {
-    for (int i = 6; i < 10; i++) {
+    for (int i = 6; i < 11; i++) {
         printf("-----------------\n");
         test_align32(pow(2, i));
         test_align32blocking(pow(2, i));

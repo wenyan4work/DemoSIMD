@@ -7,11 +7,11 @@
 #include "AlignedMemory.hpp"
 #include "Timer.hpp"
 
-#define REPEAT (100)
+#define REPEAT (1)
 
 void test_memcpy(int size) {
-    double *__restrict__ fromPtr = new double[size];
-    double *__restrict__ toPtr = new double[size];
+    double *fromPtr = new double[size];
+    double *toPtr = new double[size];
     Timer timer;
     timer.start();
     for (int i = 0; i < REPEAT; i++) {
@@ -21,11 +21,13 @@ void test_memcpy(int size) {
     timer.dump();
     printf("data %lf MB, bandwidth: %lf MB/s\n", (size * 8 / (1024.0 * 1024.0)),
            (size * 8 / (1024.0 * 1024.0)) * REPEAT / timer.getTime());
+    delete[] fromPtr;
+    delete[] toPtr;
 }
 
 void test_simple(int size) {
-    double *__restrict__ fromPtr = new double[size];
-    double *__restrict__ toPtr = new double[size];
+    double *fromPtr = new double[size];
+    double *toPtr = new double[size];
     Timer timer;
     timer.start();
     for (int j = 0; j < REPEAT; j++) {
@@ -38,13 +40,34 @@ void test_simple(int size) {
     printf("data %lf MB, bandwidth: %lf MB/s\n", (size * 8 / (1024.0 * 1024.0)),
            (size * 8 / (1024.0 * 1024.0)) * REPEAT / timer.getTime());
     printf("%f\n", toPtr[size - 1]);
+    delete[] fromPtr;
+    delete[] toPtr;
+}
+
+void test_alignedsimple(int size) {
+    AlignedMemory<double, 32> frommem(size);
+    AlignedMemory<double, 32> tomem(size);
+    double *fromPtr = frommem.alignedPtr;
+    double *toPtr = tomem.alignedPtr;
+    Timer timer;
+    timer.start();
+    for (int j = 0; j < REPEAT; j++) {
+        for (int i = 0; i < size; i++) {
+            toPtr[i] = fromPtr[i];
+        }
+    }
+    timer.stop("aligned simple copy complete, ");
+    timer.dump();
+    printf("data %lf MB, bandwidth: %lf MB/s\n", (size * 8 / (1024.0 * 1024.0)),
+           (size * 8 / (1024.0 * 1024.0)) * REPEAT / timer.getTime());
+    printf("%f\n", toPtr[size - 1]);
 }
 
 void test_ompsimd(int size) {
     AlignedMemory<double, 32> frommem(size);
     AlignedMemory<double, 32> tomem(size);
-    double *__restrict__ fromPtr = frommem.alignedPtr;
-    double *__restrict__ toPtr = tomem.alignedPtr;
+    double *fromPtr = frommem.alignedPtr;
+    double *toPtr = tomem.alignedPtr;
     Timer timer;
     timer.start();
     for (int j = 0; j < REPEAT; j++) {
@@ -61,11 +84,17 @@ void test_ompsimd(int size) {
 }
 
 int main() {
-    for (int i = 1; i < 8; i++) {
+    // warming up
+    test_ompsimd(1000000);
+    printf("--------warming up completed---------\n");
+
+    for (int i = 4; i < 9; i++) {
         printf("-----------------\n");
-        test_memcpy(pow(4, i + 5));
-        test_simple(pow(4, i + 5));
-        test_ompsimd(pow(4, i + 5));
+        const int size = pow(4, i + 5);
+        test_memcpy(size);
+        test_simple(size);
+        test_alignedsimple(size);
+        test_ompsimd(size);
     }
 
     return 0;

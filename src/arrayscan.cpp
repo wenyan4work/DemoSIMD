@@ -12,8 +12,8 @@
 #define REPEAT (100)
 
 void test_simple(int size) {
-    double *__restrict__ fromPtr = new double[size];
-    double *__restrict__ toPtr = new double[size];
+    double *fromPtr = new double[size];
+    double *toPtr = new double[size];
     for (int i = 0; i < size; i++) {
         fromPtr[i] = i;
         toPtr[i] = 0;
@@ -31,13 +31,15 @@ void test_simple(int size) {
     printf("data %lf MB, bandwidth: %lf MB/s\n", (size * 8 / (1024.0 * 1024.0)),
            (size * 8 / (1024.0 * 1024.0)) * REPEAT / timer.getTime());
     printf("%f\n", toPtr[size - 1]);
+    delete[] fromPtr;
+    delete[] toPtr;
 }
 
 void test_ompsimd(int size) {
     AlignedMemory<double, 32> frommem(size);
     AlignedMemory<double, 32> tomem(size);
-    double *__restrict__ fromPtr = frommem.alignedPtr;
-    double *__restrict__ toPtr = tomem.alignedPtr;
+    double *fromPtr = frommem.alignedPtr;
+    double *toPtr = tomem.alignedPtr;
 
     for (int i = 0; i < size; i++) {
         fromPtr[i] = i;
@@ -62,8 +64,8 @@ void test_ompsimd(int size) {
 void test_manual(int size) {
     AlignedMemory<double, 32> frommem(size);
     AlignedMemory<double, 32> tomem(size);
-    double *__restrict__ fromPtr = frommem.alignedPtr;
-    double *__restrict__ toPtr = tomem.alignedPtr;
+    double *fromPtr = frommem.alignedPtr;
+    double *toPtr = tomem.alignedPtr;
 
     for (int i = 0; i < size; i++) {
         fromPtr[i] = i;
@@ -77,8 +79,8 @@ void test_manual(int size) {
 
     for (int j = 0; j < REPEAT; j++) {
         for (int i = 0; i < size; i += 4) {
-            _mm_prefetch((char *)fromPtr + i, _MM_HINT_T0); // no performance gain
-            _mm_prefetch((char *)toPtr + i, _MM_HINT_T0);
+            _mm_prefetch((char *)fromPtr + i + 4, _MM_HINT_T0); // no performance gain
+            _mm_prefetch((char *)toPtr + i + 4, _MM_HINT_T0);
 
             __m256d to = _mm256_load_pd(toPtr + i);
             __m256d from = _mm256_load_pd(fromPtr + i);
