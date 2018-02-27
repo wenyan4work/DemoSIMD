@@ -5,7 +5,6 @@
 #include <cstring>
 
 #include "AlignedMemory.hpp"
-#include "EigenDef.hpp"
 #include "Timer.hpp"
 
 void test_align32(int size) {
@@ -34,24 +33,30 @@ void test_align32(int size) {
 
     timer.stop("align32 simple gemm complete, ");
     timer.dump();
-    printf("data %lf MB, %lf DP GFLOP/s\n", (size * size * 8 / (1024.0 * 1024.0)),
-           (2 * size * size * size / (1024.0 * 1024.0 * 1024.0)) / timer.getTime());
+    printf("C[0,0]: %lf\n", C[0]);
+    printf("data %lf MB, %lf DP GFLOP/s\n", pow(size / 1024.0, 2.0) * 8, 2 * pow(size / 1024.0, 3.0) / timer.getTime());
 }
+
+#ifdef HAVE_EIGEN
+
+#include "EigenDef.hpp"
 
 void test_eigen(int size) {
     using Mat = Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>;
     Mat A(size, size), B(size, size), C(size, size);
-    A.setRandom();
-    B.setRandom();
+    A.setOnes();
+    B.setOnes();
 
     Timer timer;
     timer.start();
     C = A * B;
     timer.stop("eigen gemm complete, ");
     timer.dump();
-    printf("data %lf MB, %lf DP GFLOP/s\n", (size * size * 8 / (1024.0 * 1024.0)),
-           (2 * size * size * size / (1024.0 * 1024.0 * 1024.0)) / timer.getTime());
+    printf("C[0,0]: %lf\n", C(0, 0));
+    printf("data %lf MB, %lf DP GFLOP/s\n", pow(size / 1024.0, 2.0) * 8, 2 * pow(size / 1024.0, 3.0) / timer.getTime());
 }
+
+#endif
 
 void test_align32blocking(int size) {
     AlignedMemory<double, 32> Amem(size * size);
@@ -83,8 +88,8 @@ void test_align32blocking(int size) {
 
     timer.stop("align32 blocking gemm complete, ");
     timer.dump();
-    printf("data %lf MB, %lf DP GFLOP/s\n", (size * size * 8 / (1024.0 * 1024.0)),
-           (2 * size * size * size / (1024.0 * 1024.0 * 1024.0)) / timer.getTime());
+    printf("C[0,0]: %lf\n", C[0]);
+    printf("data %lf MB, %lf DP GFLOP/s\n", pow(size / 1024.0, 2.0) * 8, 2 * pow(size / 1024.0, 3.0) / timer.getTime());
 }
 
 int main() {
@@ -92,7 +97,9 @@ int main() {
         printf("-----------------\n");
         test_align32(pow(2, i));
         test_align32blocking(pow(2, i));
+#ifdef HAVE_EIGEN
         test_eigen(pow(2, i));
+#endif
     }
 
     return 0;

@@ -1,25 +1,53 @@
--include $(PVFMM_DIR)/MakeVariables
+# switches, yes or no
+HAVEPVFMM = yes
+HAVEEIGEN = yes
+VECREPORT = yes
 
+# change this if you need eigen. no action needed if not using eigen
 EIGEN = /mnt/home/wyan/local/include/eigen3
-# PVFMMINC = /mnt/home/wyan/local/include/pvfmm
-# PVFMMLIB = /mnt/home/wyan/local/lib/pvfmm
-# LDFLAGS= -L$(PVFMMLIB) -lpvfmm
+
+
+# Possible choices of compilers and flags if not using PVFMM
+# Will be replaced if pvfmm is used
 
 # linux intel
-CXX=mpicxx
-CXXFLAGS= -std=c++11 -qopenmp -O3 -DNDEBUG -xcore-avx2 -qopt-report=1 -qopt-report-phase=vec
+CXX=icpc
+CXXFLAGS= -std=c++11 -qopenmp -O3 -DNDEBUG -xcore-avx2
 
 # linux gcc
-# CXX=g++
+# CXX= g++
 # CXXFLAGS= -std=c++11 -fopenmp -O3 -DNDEBUG -march=core-avx2 
 
-# mac
-#CXX=g++-mp-7
+# mac. DO NOT use mac default gcc/clang. Use gcc from macports or homebrew
+#CXX= g++-mp-7
 #CXXFLAGS=  -std=c++11 -fopenmp -O3 -DNDEBUG -march=core-avx2 -Wa,-q -I/Users/wyan/local/include/eigen3
 
-CXXFLAGS= $(CXXFLAGS_PVFMM) -I$(EIGEN)
+###############################################
+#   No modifications needed below this line   #
+############################################### 
+
 LD= $(CXX) 
+LINKFLAGS= $(CXXFLAGS)
+
+ifeq ($(HAVEPVFMM),yes)
+# replace flags with CXXFLAGS_PVFMM and LDLIBS_PVFMM
+-include $(PVFMM_DIR)/MakeVariables
+CXX= mpicxx # the compiler you used to compile PVFMM
+LD= $(CXX) 
+CXXFLAGS= $(CXXFLAGS_PVFMM) -DHAVE_PVFMM -no-ipo
 LINKFLAGS= $(CXXFLAGS_PVFMM) $(LDLIBS_PVFMM)
+endif
+
+ifeq ($(HAVEEIGEN),yes)
+# location of EIGEN library
+CXXFLAGS += -I$(EIGEN) -DHAVE_EIGEN
+endif
+
+ifeq ($(VECREPORT),yes)
+# only available for intel compilers
+# change 5 to 1 or 2 to generate less report
+CXXFLAGS += -qopt-report=5 -qopt-report-phase=vec # or =all
+endif
 
 RM = rm -f
 MKDIRS = mkdir -p

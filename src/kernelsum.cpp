@@ -7,11 +7,6 @@
 #include "AlignedMemory.hpp"
 #include "Timer.hpp"
 
-#include "pvfmm.hpp"
-
-PeriodicType periodicType;
-
-
 constexpr double Pi = 3.141592653589793238462643383279;
 
 inline double Abs(double x) { return std::abs(x); }
@@ -150,8 +145,14 @@ void test_expand(int npts) {
     delete[] vPtr;
 }
 
+#ifdef HAVE_PVFMM
+
+#include "pvfmm.hpp"
+
+PeriodicType periodicType;
+
 void test_pvfmm(int npts) {
-    MPI_Init(nullptr,nullptr);
+    MPI_Init(nullptr, nullptr);
     double *cPtr = new double[3 * npts]; // coordinate
     double *fPtr = new double[3 * npts]; // force
     double *vPtr = new double[3 * npts]; // velocity
@@ -165,7 +166,7 @@ void test_pvfmm(int npts) {
     pvfmm::PtFMM matrixG;
     // pvfmm::PtFMM_Tree *treePtrG;
     // pvfmm::PtFMM_Data treeDataG;
-    matrixG.Initialize(12, MPI_COMM_WORLD, &kernel);
+    matrixG.Initialize(6, MPI_COMM_WORLD, &kernel);
 
     Timer timer;
     timer.start();
@@ -180,12 +181,13 @@ void test_pvfmm(int npts) {
     delete[] vPtr;
     MPI_Finalize();
 }
-
-void test_ompsimd(int size) {}
+#endif
 
 int main() {
     test_simple(2000);
     test_expand(2000);
+#ifdef HAVE_PVFMM
     test_pvfmm(2000);
+#endif
     return 0;
 }
