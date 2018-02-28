@@ -1,0 +1,114 @@
+#include <cmath>
+#define SIZE 8192
+
+int mul17(int num) {
+    return num*17;
+}
+
+double copy(int num) {
+    double a[SIZE];
+    double b[SIZE];
+
+    for(unsigned int i=0;i<SIZE;i++){
+        a[i]=b[i];
+    }
+    return a[SIZE-1];
+}
+
+double fma(double num) {
+    // also demo loop unroll and loop end predicate
+    double a[SIZE];
+    double b[SIZE];
+
+    for(unsigned int i=0;i<SIZE;i++){
+                const double bnext=b[i+1];
+        a[i]=a[i]*b[i]+num;
+    }
+    return a[SIZE-1];
+}
+
+void test_expand(int npts) {
+    double *cPtr = new double[3 * npts]; // coordinate
+    double *fPtr = new double[3 * npts]; // force
+    double *vPtr = new double[3 * npts]; // velocity
+    for (int i = 0; i < 3 * npts; i++) {
+        fPtr[i] = 1;
+        vPtr[i] = 0;
+        cPtr[i] = i;
+    }
+
+    const double factor8pi = 1 / (8 * 3.14159265589793);
+
+    for (int i = 0; i < npts; i++) {
+        const double tx = cPtr[3 * i];
+        const double ty = cPtr[3 * i + 1];
+        const double tz = cPtr[3 * i + 2];
+        double trgValueX = 0;
+        double trgValueY = 0;
+        double trgValueZ = 0;
+        // rely on compiler for auto-vectorization
+        for (int j = 0; j < npts; j++) {
+            const double lx = cPtr[3 * j];
+            const double ly = cPtr[3 * j + 1];
+            const double lz = cPtr[3 * j + 2];
+            const double fx = fPtr[3 * j];
+            const double fy = fPtr[3 * j + 1];
+            const double fz = fPtr[3 * j + 2];
+            const double rx = (tx - lx);
+            const double ry = (ty - ly);
+            const double rz = (tz - lz);
+            const double rnorm2 = rx * rx + ry * ry + rz * rz;
+            if (rnorm2 != 0) {
+                const double rinv = 1 / sqrt(rnorm2);
+                const double rinv3 = rinv * rinv * rinv;
+                const double commonFac = (rx * fx + ry * fy + rz * fz);
+                trgValueX += fx * rinv + commonFac * rx * rinv3;
+                trgValueY += fy * rinv + commonFac * ry * rinv3;
+                trgValueZ += fz * rinv + commonFac * rz * rinv3;
+            }
+        }
+        vPtr[3 * i] += trgValueX * factor8pi;
+        vPtr[3 * i + 1] += trgValueY * factor8pi;
+        vPtr[3 * i + 2] += trgValueZ * factor8pi;
+    }
+
+    delete[] cPtr;
+    delete[] fPtr;
+    delete[] vPtr;
+}
+
+#include <immintrin.h>
+__m256 rsqrt(__m256 input){
+    return _mm256_rsqrt_ps(input);
+}
+__m256d exp(__m256d input){
+    return _mm256_exp_pd(input);
+}
+
+
+float rsqrt(float num){
+    float a[SIZE];
+    float b[SIZE];
+    
+    for(unsigned int i=0;i<SIZE;i+=8){
+        _mm_prefetch((char*) b+i+8, _MM_HINT_NTA );
+        __m256 bvec8=_mm256_load_ps(b+i);
+        __m256 avec8=_mm256_rsqrt_ps(bvec8);
+        _mm256_store_ps(a+i,avec8);
+    }
+    return a[SIZE-1];
+}
+
+float rsqrt8(){
+    float data[8] = {1, 2, 3, 4, 5, 6, 7, 8};
+    float result[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+
+    const __m256 d = _mm256_load_ps(data);
+    __m256 r = _mm256_load_ps(result);
+    for (unsigned int j = 0; j < SIZE; j++) {
+        __m256 rsqrt = _mm256_rsqrt_ps(_mm256_add_ps(r, d)); // fast inv sqrt
+        r = _mm256_add_ps(r, rsqrt);
+    }
+    _mm256_store_ps(result, r);
+    return result[0];
+}

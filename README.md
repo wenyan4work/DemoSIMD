@@ -29,3 +29,10 @@ The Eigen dgemm function relies on eigen to compile.
 Demonstrates the kernel sum performance.
 
 The pvfmm kernel sum function relies pvfmm to compile. 
+
+# References:
+1. What Every Programmer Should Know About Memory
+2. Intel® 64 and IA-32 Architectures Optimization Reference Manual
+3. Intel instrinsics guide: https://software.intel.com/sites/landingpage/IntrinsicsGuide/ 
+4. Agner Fog’s website: http://www.agner.org/
+5. Online Compiler Explorer: https://gcc.godbolt.org/
