@@ -12,7 +12,7 @@ EIGEN = /mnt/home/wyan/local/include/eigen3
 
 ## linux intel
 CXX=icpc
-CXXFLAGS= -std=c++11 -qopenmp -O3 -DNDEBUG -xcore-avx2
+CXXFLAGS= -std=c++11 -qopenmp -O3 -DNDEBUG -xcore-avx2 -mtune=haswell
 
 ## linux gcc
 # CXX= g++
@@ -38,7 +38,7 @@ ifeq ($(HAVEPVFMM),yes)
 -include $(PVFMM_DIR)/MakeVariables
 CXX= mpicxx # the compiler you used to compile PVFMM
 LD= $(CXX) 
-CXXFLAGS= $(CXXFLAGS_PVFMM) -DHAVE_PVFMM -no-ipo
+CXXFLAGS= $(CXXFLAGS_PVFMM) -DHAVE_PVFMM
 LINKFLAGS= $(CXXFLAGS_PVFMM) $(LDLIBS_PVFMM)
 endif
 
@@ -70,7 +70,8 @@ TARGET_BIN = \
        $(BINDIR)/arrayscan \
        $(BINDIR)/gemm \
        $(BINDIR)/rsqrt \
-       $(BINDIR)/kernelsum
+       $(BINDIR)/kernelsum \
+       $(BINDIR)/legp
 
 all : $(TARGET_BIN)
 
