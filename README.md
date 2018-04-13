@@ -30,6 +30,9 @@ Demonstrates the kernel sum performance.
 
 The pvfmm kernel sum function relies pvfmm to compile. 
 
+## legp.cpp:
+Demonstrates the effect of HornerForm in polynomial evaluations.
+
 # References:
 1. What Every Programmer Should Know About Memory
 2. Intel® 64 and IA-32 Architectures Optimization Reference Manual
